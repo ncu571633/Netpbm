@@ -6,7 +6,7 @@ LIBS =
 CPPFLAGS = -Wall -g3 -std=c++11
 
 ########################################################
-objects = ImageData.o NetPbmImage.o FileMMap.o 
+objects = ImageData.o NetPbmImage.o FileMMap.o NetPbmImageRaw.cpp 
 
 all: main.o $(objects)
 	$(CC) -o test main.o $(objects) $(CPPFLAGS) $(LIBS)

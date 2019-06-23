@@ -31,28 +31,36 @@ namespace netPbm
         public:
             virtual ~NetPbmImage();
     
-            virtual bool ReadNetPbmHead(FILE *fp) = 0;
-            virtual void Read(FILE* fp) = 0;
-            virtual bool Write(const std::string filePath) = 0; 
+            virtual bool ReadNetPbmHead(void* fp) = 0;
+            virtual void Read(void* fp) = 0;
+            virtual bool Write(const std::string& filePath) = 0; 
     };
 
-    class GrayColorNetPbmImageASCII: public NetPbmImage
+    class NetPbmImageASCII: public NetPbmImage
     {
         public:
-            bool ReadNetPbmHead(FILE *fp);
-            void Read(FILE* fp);
+            int SkipNetPbmComment (void *p);
+            bool ReadNetPbmHead(void* fp);
+            void Read(void* fp);
+    };
+
+    class NetPbmImageRAW: public NetPbmImage
+    {
+        public:
+            bool ReadNetPbmHead(void* fp);
+            void Read(void* fp);
     };
 
     class P1_PBM_ASCII: public NetPbmImage
     {
         public:
-            bool Write(const std::string filePath); 
+            bool Write(const std::string& filePath); 
     };
 
     class P2_PGM_ASCII: public GrayColorNetPbmImageASCII
     {
         public:
-            bool Write(const std::string filePath); 
+            bool Write(const std::string& filePath); 
     };
 
     class P4_PBM_RAW()

@@ -13,26 +13,35 @@ namespace netPbm
         this->data = nullptr;
     }
 
+    void NetPbmImage::Read(void *fp)
+    {
+        this->ReadNetPbmHead(fp);
+        this->data->Read(fp);
+    }
+
+    /* SKIP COMMENT */
+    /* This function skips past a comment in a file. The comment */
+    /* begins with a '#' character and ends with a newline character. */
+    /* The function returns EOF if there's an error. */
+    int NetPbmImageASCII::SkipNetPbmComment (void *p)
+    {
+        FILE *fp = (FILE*)p;
+        int i;
+        while ((i = getc(fp)) == '\n' && i != EOF);
+        ungetc(i, fp);
+        if ((i = getc(fp)) == '#')
+            while ((i = getc(fp)) != '\n' && i != EOF);
+        return (ungetc(i, fp));
+    }
+
     /* READ PGM HEADER */
     /* This function reads the header of a NetPbm image. */
     /* The dimensions are returned as arguments. */
     /* The return value is false if there's an error. */
-    bool GrayColorNetPbmImageASCII::ReadNetPbmHead(FILE *fp)
+    bool NetPbmImageASCII::ReadNetPbmHead(void *p)
     {
-        /* SKIP COMMENT */
-        /* This function skips past a comment in a file. The comment */
-        /* begins with a '#' character and ends with a newline character. */
-        /* The function returns EOF if there's an error. */
-        auto SkipNetPbmComment = [](FILE *fp) -> int 
-        {
-            int i;
-            while ((i = getc(fp)) == '\n' && i != EOF);
-            ungetc(i, fp);
-            if ((i = getc(fp)) == '#')
-                while ((i = getc(fp)) != '\n' && i != EOF);
-            return (ungetc(i, fp));
-        };
-
+        FILE* fp = (FILE*)p;
+        
         // read row and column
         int column = 0, row = 0;
         bool ret = !(SkipNetPbmComment(fp) == EOF
@@ -50,7 +59,7 @@ namespace netPbm
         return ret;
     }
     
-    bool GrayColorNetPbmImage::ReadNetPbmHead(FILE *fp)
+    bool NetPbmImageASCII::ReadNetPbmHead(FILE *fp)
     {
         NetPbmImage::ReadNetPbmHead(fp);
         
@@ -58,13 +67,42 @@ namespace netPbm
         return fscanf(fp, "%d", &(this->maxValue)) == 1;
     }
 
-    void NetPbmImage::Read(FILE *fp)
+    bool P1_PBM_ASCII::Write(const std::string& filePath)
     {
-        this->ReadNetPbmHead(fp);
-        this->data->Read(fp);
+        FILE *fp = fopen(filePath.c_str(), "wt");
+        if(!fp)
+        {
+            return false;
+        }
+                
+        //acsii pbm "P1" format
+        fprintf(fp, "P1\n");
+        fprintf(fp, "%d %d\n", this->data->column, this->data->row);
+        this->data->Write(fp);
+        fclose(fp);
+
+        return true;
     }
 
-    NetPbmImage* ReadNetPbmImage(const std::string filePath)
+    bool P2_PGM_ASCII::Write(const std::string& filePath)
+    {
+        FILE *fp = fopen(filePath.c_str(), "wt");
+        if(!fp)
+        {
+            return false;
+        }
+
+        //"P2" format
+        fprintf(fp, "P2\n");
+        fprintf(fp, "%d %d %d\n", this->data->column, this->data->row, this->maxValue);
+        this->data->Write(fp);
+        fclose(fp);
+
+        return true;
+    }
+
+    // entry point: read netPbm image into memory
+    NetPbmImage* ReadNetPbmImage(const std::string& filePath)
     {
         FILE *fp = fopen(filePath.c_str(), "r");
         if(!fp)
@@ -86,60 +124,24 @@ namespace netPbm
         {
             case '1'://pbm ASCII
                 ret = new P1_PBM_ASCII();
+                ret->Read(fp);
+                fclose(fp);
                 break;
             case '2'://pgm ASCII
                 ret = new P2_PGM_ASCII();
-                break;
-            case '3'://ppm ASCII
+                ret->Read(fp);
                 fclose(fp);
-                return nullptr;
+                break;
             case '4'://pbm RAW
                 fclose(fp);
-                // ReadNetPbmMMap(DataFileName, pic);
-                return nullptr;
+                ret = ReadNetPbmRAWImage(filePath);
             default:
-                // not implemented
+                // not implemented at this time
                 fclose(fp);
                 return nullptr;
         }
 
-        ret->Read(fp);
-        fclose(fp);
-        
         return ret;
     }
 
-    bool P1_PBM_ASCII::Write(const std::string filePath)
-    {
-        FILE *fp = fopen(filePath.c_str(), "wt");
-        if(!fp)
-        {
-            return false;
-        }
-                
-        //acsii pbm "P1" format
-        fprintf(fp, "P1\n");
-        fprintf(fp, "%d %d\n", this->data->column, this->data->row);
-        this->data->Write(fp);
-        fclose(fp);
-
-        return true;
-    }
-
-    bool P2_PGM_ASCII::Write(const std::string filePath)
-    {
-        FILE *fp = fopen(filePath.c_str(), "wt");
-        if(!fp)
-        {
-            return false;
-        }
-
-        //"P2" format
-        fprintf(fp, "P2\n");
-        fprintf(fp, "%d %d %d\n", this->data->column, this->data->row, this->maxValue);
-        this->data->Write(fp);
-        fclose(fp);
-
-        return true;
-    }
 }

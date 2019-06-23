@@ -7,6 +7,7 @@ namespace netPbm
     class FileMMap
     {
         public:
+            FileMap();
             ~FileMMap();
 
             char *file;	//start of the file
