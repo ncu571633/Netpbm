@@ -6,7 +6,7 @@ LIBS =
 CPPFLAGS = -Wall -g3 -std=c++11
 
 ########################################################
-objects = Matrix.o NetPbmImage.o 
+objects = ImageData.o NetPbmImage.o FileMMap.o 
 
 all: main.o $(objects)
 	$(CC) -o test main.o $(objects) $(CPPFLAGS) $(LIBS)

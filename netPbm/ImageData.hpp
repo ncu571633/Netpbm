@@ -5,15 +5,16 @@ namespace netPbm
 {
     class ImageData
     {
-        protected:
+        public:
+            ImageData(int row, int column);
+            virtual ~ImageData(){}
+            virtual void Reset() = 0;
+            virtual void Print() = 0;
+            virtual void Write(FILE* fp) = 0;
+            virtual void Read(FILE* fp) = 0;
+
             int row;
             int column;
-        public:
-            virtual bool Init(int row, int column);
-            virtual void Reset() = 0;
-            virtual void Destroy() = 0;
-            virtual void Print() = 0;
-            virtual void Write() = 0;
     };
 
     // implement Matrix by using a 1-D vector
@@ -22,10 +23,12 @@ namespace netPbm
         private:
             int* data;
         public:
-            bool Init(int row, int column);
-            void Reset() = 0;
-            void Destroy() = 0;
-            void Print() = 0;
+            VectorImageData(int row, int column);
+            ~VectorImageData();
+            void Reset();
+            void Print();
+            void Write(FILE* fp);
+            void Read(FILE* fp);
     };
 
     // implement Matrix by using a 2-D vector
@@ -34,10 +37,12 @@ namespace netPbm
         private:
             int** data;
         public:
-            bool Init(int row, int column);
-            void Reset() = 0;
-            void Destroy() = 0;
-            void Print() = 0;
+            MatrixImageData(int row, int column);
+            ~MatrixImageData();
+            void Reset();
+            void Print();
+            void Write(FILE* fp);
+            void Read(FILE* fp);
     };
 }
 #endif

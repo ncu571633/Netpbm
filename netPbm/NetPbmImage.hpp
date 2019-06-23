@@ -1,3 +1,5 @@
+#ifndef __NETPBMIMAGE_HPP__
+#define __NETPBMIMAGE_HPP__
 /*
 definition of PBM and PGM images
 Magic Number for netpbm image
@@ -9,23 +11,56 @@ Magic Number for netpbm image
    "P6" (ASCII codes 80 and 54): PPM RAW colored 
 */
 
-#include <vector>
+#include <string>
+#include <cstdio>
 
-class PIC
+#include "ImageData.hpp"
+
+// 0: use 1D array to store image
+// 1: use 2D array to store image
+#define MATRIXTYPE 0 
+
+namespace netPbm
 {
-private:
-#if 0 
-	int **data;		//2D Matrix: data matrix used to store pixels
-	int **check; 	//check matrix used to show whether the pixel is checked or not
+    class NetPbmImage
+    {
+        protected:
+            ImageData* data;
+            int maxValue;       //PGM Format: max value for black. Normally it is 255 or 65536
+
+        public:
+            virtual ~NetPbmImage();
+    
+            virtual bool ReadNetPbmHead(FILE *fp) = 0;
+            virtual void Read(FILE* fp) = 0;
+            virtual bool Write(const std::string filePath) = 0; 
+    };
+
+    class GrayColorNetPbmImageASCII: public NetPbmImage
+    {
+        public:
+            bool ReadNetPbmHead(FILE *fp);
+            void Read(FILE* fp);
+    };
+
+    class P1_PBM_ASCII: public NetPbmImage
+    {
+        public:
+            bool Write(const std::string filePath); 
+    };
+
+    class P2_PGM_ASCII: public GrayColorNetPbmImageASCII
+    {
+        public:
+            bool Write(const std::string filePath); 
+    };
+
+    class P4_PBM_RAW()
+    {
+
+    }
+
+    NetPbmImage* ReadNetPbmImage(const std::string filePath);
+}
+
 #endif
-	vector<int> data;	//1D Matrix(Array): data matrix used to store pixels
-	vector<int> check; 	//check matrix: whether the pixel is checked/visted or not
-	int width;          //image width
-	int hight;          //image height
-	int maxValue;       //PGM Format: max value for black. Normally it is 255 or 65536
-
-public:
-    void WriteNetPbm(char *filePath); 
-    void ReadNetPbm(char *filePath); 
-};
-
