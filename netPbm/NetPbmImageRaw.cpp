@@ -65,14 +65,14 @@ namespace netPbm
             for(int j=0; j < column; j++)
             {
                 int index = i * (column/8+1) + j/8;
-                // this->data[i*row + j] = FileMMapUtility::getCharBit(fp->data[index], 7-j%8);
+                this->data->Set(i, j, FileMMapUtility::getCharBit(fp->data[index], 7-j%8));
             }
         }
     }
 
     bool NetPbmImageRAW::Write(const std::string& filePath)
     {
-        FileMMap* fp = new FileMMap(filePath, 'w');
+        FileMMap* fp = new FileMMap(filePath, 'w', this);
         fp->fp = 0;
         
         strcpy(fp->file, "P4\n");

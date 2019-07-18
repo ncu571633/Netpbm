@@ -135,6 +135,7 @@ namespace netPbm
             case '4'://pbm RAW
                 fclose(fp);
                 ret = ReadNetPbmRAWImage(filePath);
+                break;
             default:
                 // not implemented at this time
                 fclose(fp);

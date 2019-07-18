@@ -13,6 +13,7 @@ namespace netPbm
             virtual void Write(FILE* fp) = 0;
             virtual void Read(FILE* fp) = 0;
             virtual int Get(int i, int j) = 0;
+            virtual void Set(int i, int j, int v) = 0;
 
             int row;
             int column;
@@ -31,6 +32,7 @@ namespace netPbm
             void Write(FILE* fp);
             void Read(FILE* fp);
             inline int Get(int i, int j) { return this->data[i*row + j]; }
+            inline void Set(int i, int j, int v) { this->data[i*row + j] = v; }
     };
 
     // implement Matrix by using a 2-D vector
@@ -46,6 +48,7 @@ namespace netPbm
             void Write(FILE* fp);
             void Read(FILE* fp);
             inline int Get(int i, int j) { return this->data[i][j]; }
+            inline void Set(int i, int j, int v) { this->data[i][j] = v; }
     };
 }
 #endif

@@ -1,8 +1,9 @@
 #include "FileMMap.hpp"
 
 #include <cstring>  // memset
-#include <cmath>  // ceil 
-#include <cstdio>// snprintf
+#include <cmath>    // ceil 
+#include <cstdio>   // snprintf
+#include <cassert>  // assert 
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -69,6 +70,7 @@ namespace netPbm
                 break;
             case ('w'):
                 {
+                    assert(img);
                     /* Stretch the file size to the size of the (mmapped) array of ints */
                     //pbm image size Binary
                     this->fileSize = FileMMapUtility::getFileSize(img->getRow(), img->getColumn());

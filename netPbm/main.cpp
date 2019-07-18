@@ -10,5 +10,9 @@ int main()
     p->Write("p2.pgm");
     delete(p);
     
+    p = netPbm::ReadNetPbmImage("resource/p4.pbm");
+    p->Write("p4.pbm");
+    delete(p);
+
     return 1;
 }

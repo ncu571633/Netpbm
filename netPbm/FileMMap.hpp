@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include <cstddef>  // size_t
+#include <sys/types.h>
 
 namespace netPbm
 {
@@ -17,8 +17,8 @@ namespace netPbm
 
             char *file;	//start of the file
             char *data; //start of the data
-            std::size_t fp;	//file pointer
-            std::size_t fileSize;	//file size
+            off_t fp;	//file pointer
+            off_t fileSize;	//file size
             int fd;	//file descriptor
     };
 
