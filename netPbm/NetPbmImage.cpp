@@ -12,11 +12,11 @@ namespace netPbm
         }
         this->data = nullptr;
     }
-
-    void NetPbmImage::Read(void *fp)
+    
+    void NetPbmImageASCII::Read(void *fp)
     {
         this->ReadNetPbmHead(fp);
-        this->data->Read(fp);
+        this->data->Read((FILE *)fp);
     }
 
     /* SKIP COMMENT */
@@ -59,12 +59,12 @@ namespace netPbm
         return ret;
     }
     
-    bool NetPbmImageASCII::ReadNetPbmHead(FILE *fp)
+    bool P2_PGM_ASCII::ReadNetPbmHead(void *fp)
     {
-        NetPbmImage::ReadNetPbmHead(fp);
+        NetPbmImageASCII::ReadNetPbmHead(fp);
         
         // P2, P3, P5, P6 pgm format
-        return fscanf(fp, "%d", &(this->maxValue)) == 1;
+        return fscanf((FILE*)fp, "%d", &(this->maxValue)) == 1;
     }
 
     bool P1_PBM_ASCII::Write(const std::string& filePath)

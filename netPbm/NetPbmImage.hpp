@@ -29,46 +29,52 @@ namespace netPbm
             int maxValue;       //PGM Format: max value for black. Normally it is 255 or 65536
 
         public:
+            NetPbmImage() { data = nullptr, maxValue = 1; }
             virtual ~NetPbmImage();
     
+            virtual int SkipNetPbmComment(void *p) = 0;
             virtual bool ReadNetPbmHead(void* fp) = 0;
             virtual void Read(void* fp) = 0;
-            virtual bool Write(const std::string& filePath) = 0; 
+            virtual bool Write(const std::string& filePath) = 0;
+
+            inline int getRow() { return data->row; }
+            inline int getColumn() { return data->column; }
+            inline int getMaxValue() { return maxValue; }
     };
 
     class NetPbmImageASCII: public NetPbmImage
     {
         public:
-            int SkipNetPbmComment (void *p);
-            bool ReadNetPbmHead(void* fp);
+            int SkipNetPbmComment(void *p);
+            virtual bool ReadNetPbmHead(void* fp);
             void Read(void* fp);
+            virtual bool Write(const std::string& filePath) = 0; 
     };
 
     class NetPbmImageRAW: public NetPbmImage
     {
         public:
+            int SkipNetPbmComment(void *p);
             bool ReadNetPbmHead(void* fp);
             void Read(void* fp);
+            bool Write(const std::string& filePath); 
     };
 
-    class P1_PBM_ASCII: public NetPbmImage
+    class P1_PBM_ASCII: public NetPbmImageASCII
     {
         public:
             bool Write(const std::string& filePath); 
     };
 
-    class P2_PGM_ASCII: public GrayColorNetPbmImageASCII
+    class P2_PGM_ASCII: public NetPbmImageASCII
     {
         public:
+            bool ReadNetPbmHead(void* fp);
             bool Write(const std::string& filePath); 
     };
 
-    class P4_PBM_RAW()
-    {
-
-    }
-
-    NetPbmImage* ReadNetPbmImage(const std::string filePath);
+    NetPbmImage* ReadNetPbmImage(const std::string& filePath);
+    NetPbmImage* ReadNetPbmRAWImage(const std::string& filePath);
 }
 
 #endif

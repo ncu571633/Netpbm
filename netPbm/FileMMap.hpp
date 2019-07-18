@@ -1,13 +1,18 @@
 #ifndef __FILEMMAP_HPP__
 #define __FILEMMAP_HPP__
 
+#include "NetPbmImage.hpp"
+
+#include <string>
+
 #include <cstddef>  // size_t
+
 namespace netPbm
 {
     class FileMMap
     {
         public:
-            FileMap();
+            FileMMap(const std::string& filePath, char type, NetPbmImage* img=nullptr);
             ~FileMMap();
 
             char *file;	//start of the file
@@ -19,11 +24,12 @@ namespace netPbm
 
     class FileMMapUtility
     {
-        static int getCharBit(unsigned char c, int nBit);
-        static int setCharBit(unsigned char c, int nBit, bool value);
-        static int intlen(int i);
-        static char * f_itoa(int value, char * str, int strSize);
-        static int getFileSize(int row, int column);
+        public:
+            static int getCharBit(unsigned char c, int nBit);
+            static int setCharBit(unsigned char c, int nBit, bool value);
+            static int intlen(int i);
+            static char * f_itoa(int value, char * str, int strSize);
+            static int getFileSize(int row, int column);
     };
 }
 

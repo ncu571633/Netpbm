@@ -1,4 +1,6 @@
-#include <stdlib.h>	//itoa
+#include "FileMMap.hpp"
+
+#include <cstring>  //strcpy
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -10,36 +12,35 @@ namespace netPbm
 {
     int NetPbmImageRAW::SkipNetPbmComment (void *p)
     {
-        FILEMMAP* fmmap = (FILEMMAP*)p;
+        FileMMap* fp = (FileMMap*)p;
 
-        while(	((fmmap->file[fmmap->fp] == '\n') || (fmmap->file[fmmap->fp] == ' '))
-                &&	fmmap->fp<fmmap->fileSize
+        while(	((fp->file[fp->fp] == '\n') || (fp->file[fp->fp] == ' '))
+                &&	fp->fp<fp->fileSize
              )
-            fmmap->fp++;
-        if(fmmap->file[fmmap->fp] == '#')
-            while((fmmap->file[fmmap->fp] != '\n') && fmmap->fp<fmmap->fileSize)
-                fmmap->fp++;
-        while(	((fmmap->file[fmmap->fp] == '\n') || (fmmap->file[fmmap->fp] == ' '))
-                &&	fmmap->fp<fmmap->fileSize
+            fp->fp++;
+        if(fp->file[fp->fp] == '#')
+            while((fp->file[fp->fp] != '\n') && fp->fp<fp->fileSize)
+                fp->fp++;
+        while(	((fp->file[fp->fp] == '\n') || (fp->file[fp->fp] == ' '))
+                &&	fp->fp<fp->fileSize
              )
-            fmmap->fp++;
+            fp->fp++;
 
         return true;
     }
 
-    bool NetPbmImageASCII::ReadNetPbmHead(void *p)
+    bool NetPbmImageRAW::ReadNetPbmHead(void *p)
     {
-        FILEMMAP* fp = (FILEMMAP*)p;
+        FileMMap* fp = (FileMMap*)p;
         
-        int row = 0, column = 0;
-        SkipNetPbmCommentMMAP(fp);
+        SkipNetPbmComment(fp);
         int column = atoi(&fp->file[fp->fp]);
-        fmmap->fp += FileMMapUtility::intlen(column);
+        fp->fp += FileMMapUtility::intlen(column);
         
-        SkipNetPbmCommentMMAP(fp);
+        SkipNetPbmComment(fp);
         int row = atoi(&fp->file[fp->fp]);
-        fp->fp += FileMMapUtility::intlen(nrows);
-        SkipNetPbmCommentMMAP(fp);
+        fp->fp += FileMMapUtility::intlen(row);
+        SkipNetPbmComment(fp);
 
         //start of data
         fp->data = fp->file + fp->fp;
@@ -50,56 +51,57 @@ namespace netPbm
 #else
             MatrixImageData(row, column);
 #endif
+        return true;
     }
 
-    bool NetPbmImageRAW::Read(void* p)
+    void NetPbmImageRAW::Read(void* p)
     {
         this->ReadNetPbmHead(p);
 
-        FILEMMAP* fmmap = (FILEMMAP*)p;
+        FileMMap* fp = (FileMMap*)p;
+        int row = this->getRow(), column = this->getColumn();
         for(int i=0; i < row; i++)
         {
             for(int j=0; j < column; j++)
             {
                 int index = i * (column/8+1) + j/8;
-                this->data[i*row + j]= getCharBit(fmmap->data[index], 7-j%8);
+                // this->data[i*row + j] = FileMMapUtility::getCharBit(fp->data[index], 7-j%8);
             }
         }
-
-        return true;
     }
 
     bool NetPbmImageRAW::Write(const std::string& filePath)
     {
-        FileMMap* fp = new FileMMap(filePath, 'r');
+        FileMMap* fp = new FileMMap(filePath, 'w');
+        fp->fp = 0;
+        
+        strcpy(fp->file, "P4\n");
+        fp->fp += 3;
 
-        fmmap->fp = 0;
-        strcpy(fmmap->file, "P4\n");
-        fmmap->fp += 3;
+        int row = this->getRow(), column = this->getColumn();
+        strcpy(&fp->file[fp->fp], std::to_string(column).c_str());
+        fp->fp += FileMMapUtility::intlen(column);
+        fp->file[fp->fp++] = ' ';
 
-        char ctemp[FILENAMEBUFFERSIZE];
-        strcpy(&fmmap->file[fmmap->fp], f_itoa(pic->width, ctemp, FILENAMEBUFFERSIZE));
-        fmmap->fp += intlen(pic->width);
-        fmmap->file[fmmap->fp++] = ' ';
+        strcpy(&fp->file[fp->fp], std::to_string(row).c_str());
+        fp->fp += FileMMapUtility::intlen(row);
+        fp->file[fp->fp++] = ' ';
 
-        strcpy(&fmmap->file[fmmap->fp], f_itoa(pic->hight, ctemp, FILENAMEBUFFERSIZE));
-        fmmap->fp += intlen(pic->hight);
-        fmmap->file[fmmap->fp++] = ' ';
-
-        fmmap->data = fmmap->file + fmmap->fp;
-        int i, j;
-        for(i=0; i < this->data->row; i++)
+        fp->data = fp->file + fp->fp;
+        for(int i=0; i < row; i++)
         {
-            for(j=0; j < this->data->column; j++)
+            for(int j=0; j < column; j++)
             {
-                if(this->data->index(i, j) == 1)
+                if(this->data->Get(i, j) == 1)
                 {
-                    int index = i * ((this->data->column-1)/8+1) + j/8;
-                    fmmap->data[index] = setCharBit(fmmap->data[index], 7-j%8, picdata(i, j));
+                    int index = i * ((column-1)/8+1) + j/8;
+                    fp->data[index] = FileMMapUtility::setCharBit(fp->data[index], 7-j%8, 1);
                 }
             }
         }
-        DestroyFILEMMAP(&fmmap);
+        
+        delete(fp);
+        return true;
     }
 
     NetPbmImage* ReadNetPbmRAWImage(const std::string& filePath)
@@ -109,7 +111,6 @@ namespace netPbm
         if( fp->file[0] != 'P')
             return nullptr;
         fp->fp += 2;	//"PX"
-        this->SkipNetPbmComment(fp);
         
         NetPbmImage* ret = nullptr;
         switch( fp->file[1] )
@@ -118,29 +119,22 @@ namespace netPbm
             case '2':
             case '3':
                 perror("Should not reach here.\n"); 
-                return false;
             
             case '4':	//P4 PBM Binary RAW
-                ret = new NetPbmImageRaw();
+                ret = new NetPbmImageRAW();
                 ret->Read(fp);
-
-                this->maxValue = 1;
-
                 break;
             
             case '5':
             case '6':
                 perror("not implemented.\n");
-                return false;
 
             default:
                 perror("unknown type.\n");
-                return false;
         }
 
         delete(fp);
 
         return ret;
-
     }
 }

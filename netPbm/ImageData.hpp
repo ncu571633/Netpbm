@@ -30,7 +30,7 @@ namespace netPbm
             void Print();
             void Write(FILE* fp);
             void Read(FILE* fp);
-            inline int Get(i, j) { return this->data[i*row + j]; }
+            inline int Get(int i, int j) { return this->data[i*row + j]; }
     };
 
     // implement Matrix by using a 2-D vector
@@ -45,7 +45,7 @@ namespace netPbm
             void Print();
             void Write(FILE* fp);
             void Read(FILE* fp);
-            inline int Get(i, j) { return this->data[i][j]; }
+            inline int Get(int i, int j) { return this->data[i][j]; }
     };
 }
 #endif
