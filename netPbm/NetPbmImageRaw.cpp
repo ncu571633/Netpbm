@@ -10,6 +10,11 @@
 
 namespace netPbm
 {
+    ImageData* NetPbmImageRAW::InitImageData(int row, int column)
+    {
+        return new ArrayImageData(row, column);
+    }
+
     int NetPbmImageRAW::SkipNetPbmComment (void *p)
     {
         FileMMap* fp = (FileMMap*)p;
@@ -45,12 +50,7 @@ namespace netPbm
         //start of data
         fp->data = fp->file + fp->fp;
         
-        this->data = new 
-#if MATRIXTYPE 
-            VectorImageData(row, column);
-#else
-            MatrixImageData(row, column);
-#endif
+        this->data = InitImageData(row, column); 
         return true;
     }
 
@@ -93,6 +93,7 @@ namespace netPbm
             for(int j=0; j < column; j++)
             {
                 if(this->data->Get(i, j) == 1)
+                // if(this->data[i][j] == 1)
                 {
                     int index = i * ((column-1)/8+1) + j/8;
                     fp->data[index] = FileMMapUtility::setCharBit(fp->data[index], 7-j%8, 1);

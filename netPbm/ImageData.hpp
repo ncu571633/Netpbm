@@ -1,17 +1,22 @@
 #ifndef __MATRIX_HPP__
 #define __MATRIX_HPP__
 
+#include <cassert>  // assert 
+    #include <iostream>
+
 namespace netPbm
 {
     class ImageData
     {
         public:
             ImageData(int row, int column);
+            void Read(FILE* fp);
+            void Write(FILE* fp);
+            void Print();
+            
             virtual ~ImageData(){}
             virtual void Reset() = 0;
-            virtual void Print() = 0;
-            virtual void Write(FILE* fp) = 0;
-            virtual void Read(FILE* fp) = 0;
+            virtual int* operator[] (int i) = 0;
             virtual int Get(int i, int j) = 0;
             virtual void Set(int i, int j, int v) = 0;
 
@@ -19,20 +24,49 @@ namespace netPbm
             int column;
     };
 
-    // implement Matrix by using a 1-D vector
-    class VectorImageData: public ImageData
+    // implement Matrix by using a 1-D array 
+    class ArrayImageDataBase: public ImageData
     {
-        private:
+        protected:
             int* data;
+            int size;
         public:
-            VectorImageData(int row, int column);
-            ~VectorImageData();
+            ArrayImageDataBase(int row, int column)
+                :ImageData(row, column)
+            {
+
+            }
+            virtual ~ArrayImageDataBase();
             void Reset();
-            void Print();
-            void Write(FILE* fp);
-            void Read(FILE* fp);
-            inline int Get(int i, int j) { return this->data[i*row + j]; }
-            inline void Set(int i, int j, int v) { this->data[i*row + j] = v; }
+    };
+
+    class ArrayImageData: public ArrayImageDataBase
+    {
+        public:
+            ArrayImageData(int row, int column);
+            
+            virtual int* operator[] (int i) { return &(this->data[i*row]); }
+            virtual int Get(int i, int j) { return this->data[i*row + j]; }
+            virtual void Set(int i, int j, int v) { this->data[i*row + j] = v; }
+    };
+
+    // implement Matrix by storing in int array, each element is a bit
+    // [i][j]:  (i*row + j) / 8 int
+    //          (i*row + j) % 8 bit
+    class BitArrayImageData: public ArrayImageDataBase
+    {
+        public:
+            BitArrayImageData(int row, int column);
+            
+            inline int Get(int i, int j) { return (this->data[Index(i, j)] & Mask(i, j)) >> Bit(i, j); }
+            void Set(int i, int j, int v);
+
+        private:
+            virtual int* operator[] (int i) { assert(0); }
+            // sizeof(int) == 4
+            inline int Index(int i, int j) { return (i*column+j) / (8 * sizeof(int)); }
+            inline int Bit(int i, int j) { return (i*column+j) % (8 * sizeof(int)); }
+            inline int Mask(int i, int j) { return 1 << Bit(i, j); }
     };
 
     // implement Matrix by using a 2-D vector
@@ -44,9 +78,8 @@ namespace netPbm
             MatrixImageData(int row, int column);
             ~MatrixImageData();
             void Reset();
-            void Print();
-            void Write(FILE* fp);
-            void Read(FILE* fp);
+
+            inline int* operator[] (int i) { return this->data[i]; }
             inline int Get(int i, int j) { return this->data[i][j]; }
             inline void Set(int i, int j, int v) { this->data[i][j] = v; }
     };

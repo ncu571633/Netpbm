@@ -50,23 +50,15 @@ namespace netPbm
             || SkipNetPbmComment(fp) == EOF
             || fscanf(fp, "%d", &row) != 1);
 
-        this->data = new 
-#if MATRIXTYPE 
-            VectorImageData(row, column);
-#else
-            MatrixImageData(row, column);
-#endif
+        this->data = this->InitImageData(row, column); 
         return ret;
     }
-    
-    bool P2_PGM_ASCII::ReadNetPbmHead(void *fp)
-    {
-        NetPbmImageASCII::ReadNetPbmHead(fp);
-        
-        // P2, P3, P5, P6 pgm format
-        return fscanf((FILE*)fp, "%d", &(this->maxValue)) == 1;
-    }
 
+    ImageData* P1_PBM_ASCII::InitImageData(int row, int column)
+    {
+        return new BitArrayImageData(row, column);
+    }
+    
     bool P1_PBM_ASCII::Write(const std::string& filePath)
     {
         FILE *fp = fopen(filePath.c_str(), "wt");
@@ -82,6 +74,24 @@ namespace netPbm
         fclose(fp);
 
         return true;
+    }
+
+    ImageData* P2_PGM_ASCII::InitImageData(int row, int column)
+    {
+        return new 
+#if MATRIXTYPE 
+            MatrixImageData(row, column);
+#else
+            ArrayImageData(row, column);
+#endif
+    }
+
+    bool P2_PGM_ASCII::ReadNetPbmHead(void *fp)
+    {
+        NetPbmImageASCII::ReadNetPbmHead(fp);
+        
+        // P2, P3, P5, P6 pgm format
+        return fscanf((FILE*)fp, "%d", &(this->maxValue)) == 1;
     }
 
     bool P2_PGM_ASCII::Write(const std::string& filePath)

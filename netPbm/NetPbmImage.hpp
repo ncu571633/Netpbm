@@ -28,6 +28,7 @@ namespace netPbm
             ImageData* data;
             int maxValue;       //PGM Format: max value for black. Normally it is 255 or 65536
 
+            virtual ImageData* InitImageData(int row, int column) = 0;
         public:
             NetPbmImage() { data = nullptr, maxValue = 1; }
             virtual ~NetPbmImage();
@@ -53,6 +54,8 @@ namespace netPbm
 
     class NetPbmImageRAW: public NetPbmImage
     {
+        private:
+            ImageData* InitImageData(int row, int column);
         public:
             int SkipNetPbmComment(void *p);
             bool ReadNetPbmHead(void* fp);
@@ -62,15 +65,19 @@ namespace netPbm
 
     class P1_PBM_ASCII: public NetPbmImageASCII
     {
+        private:
+            ImageData* InitImageData(int row, int column);
         public:
-            bool Write(const std::string& filePath); 
+            bool Write(const std::string& filePath);
     };
 
     class P2_PGM_ASCII: public NetPbmImageASCII
     {
+        private:
+            ImageData* InitImageData(int row, int column);
         public:
             bool ReadNetPbmHead(void* fp);
-            bool Write(const std::string& filePath); 
+            bool Write(const std::string& filePath);
     };
 
     NetPbmImage* ReadNetPbmImage(const std::string& filePath);

@@ -1,6 +1,6 @@
+#include <cstdlib>  // malloc
 #include <cstdio>   // fscanf
 #include <cstring>  // memset
-#include <cstdlib>  // malloc
 
 #include "ImageData.hpp"
 
@@ -12,14 +12,40 @@ namespace netPbm
         this->column = column;
     }
 
-    VectorImageData::VectorImageData(int row, int column)
-        :ImageData(row, column)
+    void ImageData::Read(FILE* fp)
     {
-        this->data = (int *)malloc(row*column*sizeof(int));
-        memset(this->data, 0, row*column*sizeof(int));
+        int v = 0;
+        for (int i=0; i<this->row; i++)
+        {
+            for (int j=0; j < this->column; j++)
+            {
+                fscanf(fp, "%i", &v);
+                this->Set(i, j, v);
+            }
+        }
     }
 
-    VectorImageData::~VectorImageData()
+    void ImageData::Write(FILE* fp)
+    {
+        for (int i = 0; i < this->row; i++)
+        {
+            for (int j = 0; j < this->column; j++)
+                fprintf(fp, "%d ", this->Get(i, j));
+            fprintf(fp, "\n");
+        }
+    }
+    
+    void ImageData::Print()
+    {
+        for (int i = 0; i < this->row; i++)
+        {
+            for (int j = 0; j < this->column; j++)
+                printf("%d ", this->Get(i, j));
+            printf("\n");
+        }
+    }
+
+    ArrayImageDataBase::~ArrayImageDataBase()
     {
         if (this->data == nullptr) 
             return;
@@ -27,41 +53,43 @@ namespace netPbm
         this->data = nullptr;
     }
 
-    void VectorImageData::Reset()
+    void ArrayImageDataBase::Reset()
     {
-        memset(this->data, 0, row*column*sizeof(int));
+        memset(this->data, 0, size);
     }
 
-    void VectorImageData::Print()
+    ArrayImageData::ArrayImageData(int row, int column)
+        :ArrayImageDataBase(row, column)
     {
-        for(int i=0; i < this->column; i++)
-            printf("%d ", this->data[i]);
-        printf("\n");
+        size = row*column*sizeof(int);
+        this->data = (int *)malloc(size);
+        memset(this->data, 0, size);
     }
 
-    void VectorImageData::Write(FILE* fp)
+    BitArrayImageData::BitArrayImageData(int row, int column)
+        :ArrayImageDataBase(row, column)
     {
-        int index = 0;
-        for (int i = 0; i < this->row; i++)
+        size = (row*column / 8) + 1;
+        this->data = (int *)malloc(size);
+        memset(this->data, 0, size);
+    }
+
+    void BitArrayImageData::Set(int i, int j, int v)
+    {
+        if (v==1)
         {
-            for (int j = 0; j < this->column; j++)
-                fprintf(fp, "%d ", this->data[index++]);
-            fprintf(fp, "\n");
+            this->data[Index(i, j)] |= Mask(i, j);
+        }
+        else if (v==0)
+        {
+            this->data[Index(i, j)] &= ~Mask(i, j); 
+        }
+        else
+        {
+            assert(0);
         }
     }
-
-    void VectorImageData::Read(FILE* fp)
-    {
-        int index = 0;
-        for (int i=0; i<this->row; i++)
-        {
-            for (int j=0; j < this->column; j++)
-            {
-                fscanf(fp, "%i", &(this->data[index++]));
-            }
-        }
-    }
-
+    
     MatrixImageData::MatrixImageData(int row, int column)
         :ImageData(row, column)
     {
@@ -95,35 +123,5 @@ namespace netPbm
     {
         for (int i=0; i<this->row; i++)
             memset(this->data[i], 0, this->column*sizeof(int));
-    }
-
-    void MatrixImageData::Print()
-    {
-        printf("row: %d, column: %d.\n", this->row, this->column);
-        for (int i=0; i<this->row; i++)
-        {
-            for(int j=0; j < this->column; j++)
-                printf("%d ", this->data[i][j]);
-            printf("\n");
-        }
-    }
-
-    void MatrixImageData::Write(FILE* fp)
-    {
-        for (int i = 0; i < this->row; i++)
-        {
-            for (int j = 0; j < this->column; j++)
-                fprintf(fp, "%d ", this->data[i][j]);
-            fprintf(fp, "\n");
-        }
-    }
-
-    void MatrixImageData::Read(FILE* fp)
-    {
-        for (int i=0; i<this->row; i++)
-        {
-            for (int j=0; j < this->column; j++)
-                fscanf(fp, "%i", &(this->data[i][j]));
-        }
     }
 }
