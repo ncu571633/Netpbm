@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include <sys/types.h>
+#include <sys/types.h>  // off_t
 
 namespace netPbm
 {

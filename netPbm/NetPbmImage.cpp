@@ -57,6 +57,7 @@ namespace netPbm
     ImageData* P1_PBM_ASCII::InitImageData(int row, int column)
     {
         return new BitArrayImageData(row, column);
+        // return new ArrayImageData(row, column);
     }
     
     bool P1_PBM_ASCII::Write(const std::string& filePath)

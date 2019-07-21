@@ -18,7 +18,7 @@ Magic Number for netpbm image
 
 // 0: use 1D array to store image
 // 1: use 2D array to store image
-#define MATRIXTYPE 0 
+#define MATRIXTYPE 0
 
 namespace netPbm
 {
@@ -29,12 +29,13 @@ namespace netPbm
             int maxValue;       //PGM Format: max value for black. Normally it is 255 or 65536
 
             virtual ImageData* InitImageData(int row, int column) = 0;
+            virtual int SkipNetPbmComment(void *p) = 0;
+            virtual bool ReadNetPbmHead(void* fp) = 0;
+
         public:
             NetPbmImage() { data = nullptr, maxValue = 1; }
             virtual ~NetPbmImage();
     
-            virtual int SkipNetPbmComment(void *p) = 0;
-            virtual bool ReadNetPbmHead(void* fp) = 0;
             virtual void Read(void* fp) = 0;
             virtual bool Write(const std::string& filePath) = 0;
 
@@ -45,9 +46,10 @@ namespace netPbm
 
     class NetPbmImageASCII: public NetPbmImage
     {
-        public:
+        protected:
             int SkipNetPbmComment(void *p);
             virtual bool ReadNetPbmHead(void* fp);
+        public:
             void Read(void* fp);
             virtual bool Write(const std::string& filePath) = 0; 
     };
@@ -56,9 +58,9 @@ namespace netPbm
     {
         private:
             ImageData* InitImageData(int row, int column);
-        public:
             int SkipNetPbmComment(void *p);
             bool ReadNetPbmHead(void* fp);
+        public:
             void Read(void* fp);
             bool Write(const std::string& filePath); 
     };
@@ -75,8 +77,8 @@ namespace netPbm
     {
         private:
             ImageData* InitImageData(int row, int column);
-        public:
             bool ReadNetPbmHead(void* fp);
+        public:
             bool Write(const std::string& filePath);
     };
 

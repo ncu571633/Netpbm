@@ -69,6 +69,7 @@ namespace netPbm
     BitArrayImageData::BitArrayImageData(int row, int column)
         :ArrayImageDataBase(row, column)
     {
+        // + 1 for padding
         size = (row*column / 8) + 1;
         this->data = (int *)malloc(size);
         memset(this->data, 0, size);
@@ -86,6 +87,7 @@ namespace netPbm
         }
         else
         {
+            // should not reach here, BitArray is for 0/1 white/black only
             assert(0);
         }
     }

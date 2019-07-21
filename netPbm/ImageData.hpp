@@ -1,8 +1,7 @@
 #ifndef __MATRIX_HPP__
 #define __MATRIX_HPP__
 
-#include <cassert>  // assert 
-    #include <iostream>
+#include <cassert>  // assert
 
 namespace netPbm
 {
@@ -32,27 +31,26 @@ namespace netPbm
             int size;
         public:
             ArrayImageDataBase(int row, int column)
-                :ImageData(row, column)
-            {
-
-            }
+                :ImageData(row, column) {}
             virtual ~ArrayImageDataBase();
             void Reset();
     };
 
+    // implement Matrix by using a 1D int array, each element is a bit
+    // [i][j]:  (i*column + j)
     class ArrayImageData: public ArrayImageDataBase
     {
         public:
             ArrayImageData(int row, int column);
             
-            virtual int* operator[] (int i) { return &(this->data[i*row]); }
-            virtual int Get(int i, int j) { return this->data[i*row + j]; }
-            virtual void Set(int i, int j, int v) { this->data[i*row + j] = v; }
+            virtual int* operator[] (int i) { return &(this->data[i*column]); }
+            virtual int Get(int i, int j) { return this->data[i*column + j]; }
+            virtual void Set(int i, int j, int v) { this->data[i*column + j] = v; }
     };
 
-    // implement Matrix by storing in int array, each element is a bit
-    // [i][j]:  (i*row + j) / 8 int
-    //          (i*row + j) % 8 bit
+    // implement Matrix by using a bit array, each element is a bit
+    // [i][j]:  (i*column + j) / 8 int
+    //          (i*column + j) % 8 bit
     class BitArrayImageData: public ArrayImageDataBase
     {
         public:

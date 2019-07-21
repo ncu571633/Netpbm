@@ -10,6 +10,7 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <unistd.h>
+
 namespace netPbm
 {
     //map a file to the memory
@@ -63,9 +64,7 @@ namespace netPbm
                 this->file = (char *)mmap (0, sb.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, this->fd, 0);
                 if (this->file == MAP_FAILED)
                 {
-                    perror ("mmap");
-                    if(sb.st_size == 0 && type == 'r')
-                        fprintf(stderr, "Read NULL file.\n");
+                    perror ("mmap failed");
                 }
                 break;
             case ('w'):
