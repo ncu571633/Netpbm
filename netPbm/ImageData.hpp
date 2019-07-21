@@ -1,5 +1,5 @@
-#ifndef __MATRIX_HPP__
-#define __MATRIX_HPP__
+#ifndef __IMAGEDATA_HPP__
+#define __IMAGEDATA_HPP__
 
 #include <cassert>  // assert
 
